@@ -1,0 +1,110 @@
+<a class="cl-skip-link" href="#main-content">Skip to content</a>
+<div class="cl-announcement">
+  Insured shipping across India <span aria-hidden="true">·</span> 7-day returns
+</div>
+<header class="cl-site-header">
+  <div class="cl-container cl-site-header__inner">
+    <button
+      class="cl-menu-button"
+      type="button"
+      aria-label="Open navigation"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="menuOpen.update((open) => !open)"
+    >
+      <span></span><span></span>
+    </button>
+    <a class="cl-brand" routerLink="/" aria-label="Carat Line home"
+      ><span>CARAT</span><i aria-hidden="true">◇</i><span>LINE</span></a
+    >
+    <nav class="cl-main-nav" [class.is-open]="menuOpen()" aria-label="Main navigation">
+      <a routerLink="/products" routerLinkActive="is-active" (click)="closeMenu()">New arrivals</a>
+      <a routerLink="/products" [queryParams]="{ category: 'rings' }" (click)="closeMenu()"
+        >Rings</a
+      >
+      <a routerLink="/products" [queryParams]="{ category: 'necklaces' }" (click)="closeMenu()"
+        >Necklaces</a
+      >
+      <a routerLink="/products" [queryParams]="{ category: 'earrings' }" (click)="closeMenu()"
+        >Earrings</a
+      >
+      <a routerLink="/products" [queryParams]="{ category: 'bracelets' }" (click)="closeMenu()"
+        >Bracelets</a
+      >
+      <a class="cl-main-nav__mobile" routerLink="/login" (click)="closeMenu()">My account</a>
+    </nav>
+    <div class="cl-header-actions">
+      <a routerLink="/login" [attr.aria-label]="auth.isAuthenticated() ? 'My account' : 'Sign in'"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 20c.5-4 3-6 7-6s6.5 2 7 6" /></svg
+      ></a>
+      <a routerLink="/wishlist" aria-label="Wishlist" class="cl-count-link"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M20.8 5.9c-1.8-2-4.8-2-6.7 0L12 8.1 9.9 5.9c-1.9-2-4.9-2-6.7 0-1.7 1.8-1.6 4.6.2 6.4L12 21l8.6-8.7c1.8-1.8 1.9-4.6.2-6.4Z"
+          />
+        </svg>
+        @if (wishlist.count()) {
+          <span>{{ wishlist.count() }}</span>
+        }
+      </a>
+      <a routerLink="/cart" aria-label="Shopping bag" class="cl-count-link"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 8h14l-1 13H6L5 8Z" />
+          <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+        </svg>
+        @if (cart.itemCount()) {
+          <span>{{ cart.itemCount() }}</span>
+        }
+      </a>
+    </div>
+  </div>
+</header>
+<div id="main-content"><router-outlet /></div>
+<footer class="cl-site-footer">
+  <div class="cl-container">
+    <div class="cl-footer-lead">
+      <div>
+        <p class="cl-eyebrow">The Carat Letter</p>
+        <h2>Stories, care notes &amp; new pieces</h2>
+      </div>
+      <form class="cl-newsletter" (submit)="$event.preventDefault()">
+        <label
+          ><span class="cl-sr-only">Email address</span
+          ><input type="email" placeholder="Your email address" autocomplete="email" /></label
+        ><button type="submit" aria-label="Subscribe">→</button>
+      </form>
+    </div>
+    <div class="cl-footer-grid">
+      <div>
+        <a class="cl-brand cl-brand--footer" routerLink="/"
+          ><span>CARAT</span><i>◇</i><span>LINE</span></a
+        >
+        <p>Modern heirlooms, thoughtfully made in India.</p>
+      </div>
+      <nav aria-label="Shop">
+        <h3>Shop</h3>
+        <a routerLink="/products">All jewellery</a
+        ><a routerLink="/products" [queryParams]="{ category: 'rings' }">Rings</a
+        ><a routerLink="/products" [queryParams]="{ category: 'necklaces' }">Necklaces</a
+        ><a routerLink="/wishlist">Wishlist</a>
+      </nav>
+      <nav aria-label="Customer care">
+        <h3>Customer care</h3>
+        <a href="mailto:care@caratline.in">Contact us</a
+        ><a routerLink="/cart">Shipping &amp; returns</a><a routerLink="/login">My account</a
+        ><a href="#care">Jewellery care</a>
+      </nav>
+      <div>
+        <h3>Visit our atelier</h3>
+        <p>Mumbai, India<br />Mon–Sat, 10am–7pm</p>
+        <a class="cl-text-link" href="mailto:appointments@caratline.in">Book an appointment</a>
+      </div>
+    </div>
+    <div class="cl-footer-bottom">
+      <span>© {{ currentYear }} Carat Line</span>
+      <div><a href="#privacy">Privacy</a><a href="#terms">Terms</a></div>
+      <span>Made with intention in India</span>
+    </div>
+  </div>
+</footer>

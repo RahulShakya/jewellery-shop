@@ -1,0 +1,227 @@
+<section class="admin-page" aria-labelledby="orders-heading">
+  <div class="page-intro">
+    <div>
+      <h2 id="orders-heading">Orders</h2>
+      <p>Follow each purchase from placement through delivery.</p>
+    </div>
+  </div>
+
+  @if (errorMessage() && orders().length) {
+    <div class="dialog-error" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="data-panel" aria-label="Customer orders">
+    <div class="table-toolbar">
+      <label class="search-field">
+        <span class="sr-only">Search orders</span>
+        <input
+          type="search"
+          placeholder="Order, customer or email"
+          [value]="searchTerm()"
+          (input)="searchOrders($any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span class="sr-only">Filter by status</span>
+        <select
+          class="status-select"
+          [value]="statusFilter()"
+          (change)="filterByStatus($any($event.target).value)"
+        >
+          <option value="all">All statuses</option>
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-lines" aria-label="Loading orders">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    } @else if (errorMessage() && !orders().length) {
+      <div class="state-card" role="alert">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h3>Orders could not be loaded</h3>
+          <p>{{ errorMessage() }}</p>
+          <button class="button secondary" type="button" (click)="loadOrders()">Try again</button>
+        </div>
+      </div>
+    } @else if (!orders().length) {
+      <div class="state-card">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">◇</span>
+          <h3>{{ orders().length ? 'No matching orders' : 'No orders yet' }}</h3>
+          <p>
+            {{
+              orders().length
+                ? 'Adjust your search or status filter.'
+                : 'Orders will appear here as customers complete checkout.'
+            }}
+          </p>
+        </div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Order</th>
+              <th scope="col">Customer</th>
+              <th scope="col">Placed</th>
+              <th scope="col">Payment</th>
+              <th scope="col">Total</th>
+              <th scope="col">Fulfilment</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of orders(); track order.id) {
+              <tr>
+                <td>
+                  <span class="table-primary">{{ order.order_number }}</span><span
+                    class="table-secondary"
+                    >{{ order.items?.length || 0 }} items</span
+                  >
+                </td>
+                <td>
+                  <span class="table-primary">{{ order.customer_name }}</span><span
+                    class="table-secondary"
+                    >{{ order.customer_email || order.customer_phone }}</span
+                  >
+                </td>
+                <td>
+                  {{ order.created_at | date: 'mediumDate'
+                  }}<span class="table-secondary">{{ order.created_at | date: 'shortTime' }}</span>
+                </td>
+                <td>
+                  <span [class]="'status-badge ' + order.payment_status">{{
+                    order.payment_status
+                  }}</span>
+                </td>
+                <td>
+                  <span class="table-primary">{{ order.total | currency: 'INR' }}</span>
+                </td>
+                <td>
+                  <select
+                    class="status-select"
+                    [value]="order.status"
+                    [disabled]="updatingOrderId() !== null"
+                    [attr.aria-label]="'Update status for ' + order.order_number"
+                    (change)="updateStatus(order, $any($event.target).value)"
+                  >
+                    @for (status of statuses; track status) {
+                      <option [value]="status">{{ status }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <button
+                    class="button secondary small"
+                    type="button"
+                    (click)="selectedOrder.set(order)"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading() && orders().length) {
+      <footer class="table-pagination">
+        <lib-pagination
+          [page]="currentPage()"
+          [total]="totalOrders()"
+          [perPage]="perPage"
+          (pageChange)="loadOrders($event)"
+        />
+      </footer>
+    }
+  </section>
+</section>
+
+@if (selectedOrder(); as order) {
+  <div
+    class="form-overlay"
+    role="presentation"
+    (click)="$event.target === $event.currentTarget && selectedOrder.set(null)"
+  >
+    <section
+      class="form-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="order-details-heading"
+    >
+      <header class="dialog-heading">
+        <div>
+          <h3 id="order-details-heading">Order {{ order.order_number }}</h3>
+          <p>Placed {{ order.created_at | date: 'medium' }}</p>
+        </div>
+        <button
+          class="dialog-close"
+          type="button"
+          aria-label="Close"
+          (click)="selectedOrder.set(null)"
+        >
+          ×
+        </button>
+      </header>
+      <div class="entity-form">
+        <div class="form-field">
+          <span>Customer</span><strong>{{ order.customer_name }}</strong
+          ><span>{{ order.customer_email || 'No email' }}</span
+          ><span>{{ order.customer_phone }}</span>
+        </div>
+        <div class="form-field">
+          <span>Ship to</span><strong>{{ order.city }} {{ order.pincode }}</strong
+          ><span>{{ order.shipping_address }}</span>
+        </div>
+        <div class="form-field">
+          <span>Payment</span><strong>{{ order.payment_method | uppercase }}</strong
+          ><span [class]="'status-badge ' + order.payment_status">{{ order.payment_status }}</span>
+        </div>
+        <label class="form-field"
+          ><span>Order status</span
+          ><select
+            class="status-select"
+            [value]="order.status"
+            [disabled]="updatingOrderId() !== null"
+            (change)="updateStatus(order, $any($event.target).value)"
+          >
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select></label
+        >
+        <div class="form-field full">
+          <span>Items</span>
+          @if (order.items?.length) {
+            @for (item of order.items ?? []; track item.id) {
+              <div class="product-cell">
+                <span class="table-primary">{{
+                  item.product?.name || item.product_name || 'Product #' + item.product_id
+                }}</span><span class="table-secondary"
+                  >{{ item.quantity }} × {{ item.unit_price | currency: 'INR' }}</span
+                >
+              </div>
+            }
+          } @else {
+            <span>No line-item details were returned.</span>
+          }
+        </div>
+        <div class="form-field">
+          <span>Subtotal</span><strong>{{ order.subtotal | currency: 'INR' }}</strong>
+        </div>
+        <div class="form-field">
+          <span>Total</span><strong>{{ order.total | currency: 'INR' }}</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+}

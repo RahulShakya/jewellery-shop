@@ -1,0 +1,9 @@
+{
+  "name": "checkout-data-access",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/checkout/data-access/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:shop", "type:data-access"],
+  "targets": {}
+}

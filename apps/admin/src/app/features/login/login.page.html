@@ -1,0 +1,61 @@
+<main class="login-page">
+  <section class="login-panel">
+    <div class="login-form-wrap">
+      <div class="form-heading">
+       
+        <h2>Administrator Login</h2>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="form-alert" role="alert">
+          <span aria-hidden="true">!</span>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <label class="field">
+          <span>Email address</span>
+          <input
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            placeholder="admin@caratline.com"
+            [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <small>Enter a valid email address.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <span class="password-field">
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+              placeholder="At least 8 characters"
+              [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid"
+            />
+            <button
+              type="button"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              (click)="showPassword.set(!showPassword())"
+            >
+              {{ showPassword() ? 'Hide' : 'Show' }}
+            </button>
+          </span>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <small>Password must contain at least 8 characters.</small>
+          }
+        </label>
+
+        <button class="submit-button" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Signing in…' : 'Sign in securely' }}
+          <span aria-hidden="true">→</span>
+        </button>
+      </form>
+    </div>
+  </section>
+</main>

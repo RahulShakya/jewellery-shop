@@ -1,0 +1,10 @@
+{
+  "name": "feature-cart",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/checkout/feature-cart/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:shop", "type:feature"],
+  "// targets": "to see all targets run: nx show project feature-cart --web",
+  "targets": {}
+}

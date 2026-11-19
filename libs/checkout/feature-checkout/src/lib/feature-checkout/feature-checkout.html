@@ -1,0 +1,194 @@
+<main class="cl-page cl-checkout-page">
+  <div class="cl-container cl-container--narrow">
+    <nav class="cl-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/cart">Shopping bag</a><span aria-hidden="true">/</span><span>Checkout</span>
+    </nav>
+
+    <header class="cl-page-heading cl-page-heading--center">
+      <p class="cl-eyebrow">Secure checkout</p>
+      <h1>Complete your order</h1>
+    </header>
+
+    @if (cart.empty()) {
+      <section class="cl-empty-state">
+        <h2>Your bag is empty</h2>
+        <p>Add a piece before starting checkout.</p>
+        <a class="cl-button cl-button--dark" routerLink="/products">Browse jewellery</a>
+      </section>
+    } @else {
+      <ol class="cl-stepper" aria-label="Checkout progress">
+        <li [class.is-active]="step() === 1" [class.is-complete]="step() > 1">
+          <span>1</span>Shipping
+        </li>
+        <li [class.is-active]="step() === 2" [class.is-complete]="step() > 2">
+          <span>2</span>Review
+        </li>
+        <li [class.is-active]="step() === 3"><span>3</span>Payment</li>
+      </ol>
+
+      <div class="cl-checkout-layout">
+        <section class="cl-checkout-panel">
+          @if (step() === 1) {
+            <h2 tabindex="-1" data-checkout-heading>Where should we deliver?</h2>
+            <p class="cl-muted">Your order is insured from our atelier to your door.</p>
+            <form
+              class="cl-form-grid"
+              [formGroup]="shippingForm"
+              (ngSubmit)="continueToReview()"
+              novalidate
+            >
+              <label class="cl-field cl-field--full">
+                <span>Full name</span><input formControlName="customer_name" autocomplete="name" />
+                @if (invalid('customer_name')) {
+                  <small>Please enter your full name.</small>
+                }
+              </label>
+              <label class="cl-field">
+                <span>Mobile number</span
+                ><input formControlName="customer_phone" autocomplete="tel" inputmode="tel" />
+                @if (invalid('customer_phone')) {
+                  <small>Enter a valid mobile number.</small>
+                }
+              </label>
+              <label class="cl-field">
+                <span>Email <em>Optional</em></span
+                ><input formControlName="customer_email" autocomplete="email" type="email" />
+                @if (invalid('customer_email')) {
+                  <small>Enter a valid email address.</small>
+                }
+              </label>
+              <label class="cl-field cl-field--full">
+                <span>Address</span
+                ><textarea
+                  formControlName="shipping_address"
+                  autocomplete="street-address"
+                  rows="3"
+                ></textarea>
+                @if (invalid('shipping_address')) {
+                  <small>Please enter the complete delivery address.</small>
+                }
+              </label>
+              <label class="cl-field">
+                <span>City</span><input formControlName="city" autocomplete="address-level2" />
+                @if (invalid('city')) {
+                  <small>Please enter your city.</small>
+                }
+              </label>
+              <label class="cl-field">
+                <span>PIN code</span
+                ><input
+                  formControlName="pincode"
+                  autocomplete="postal-code"
+                  inputmode="numeric"
+                  maxlength="6"
+                />
+                @if (invalid('pincode')) {
+                  <small>Enter a valid 6-digit PIN code.</small>
+                }
+              </label>
+              <button class="cl-button cl-button--dark cl-field--full" type="submit">
+                Review your order
+              </button>
+            </form>
+          } @else if (step() === 2) {
+            <h2 tabindex="-1" data-checkout-heading>Review your details</h2>
+            <div class="cl-review-block">
+              <div>
+                <p class="cl-kicker">Deliver to</p>
+                <button class="cl-text-button" type="button" (click)="step.set(1)">Edit</button>
+              </div>
+              <address>
+                <strong>{{ shippingForm.controls.customer_name.value }}</strong><br />
+                {{ shippingForm.controls.shipping_address.value }}<br />
+                {{ shippingForm.controls.city.value }} – {{ shippingForm.controls.pincode.value
+                }}<br />
+                {{ shippingForm.controls.customer_phone.value }}
+              </address>
+            </div>
+            <div class="cl-checkout-actions">
+              <button class="cl-button cl-button--light" type="button" (click)="goBack()">
+                Back
+              </button>
+              <button class="cl-button cl-button--dark" type="button" (click)="continueToPayment()">
+                Choose payment
+              </button>
+            </div>
+          } @else {
+            <h2 tabindex="-1" data-checkout-heading>Payment method</h2>
+            <label class="cl-payment-option">
+              <input type="radio" name="payment" value="cod" checked />
+              <span
+                ><strong>Cash on delivery</strong
+                ><small>Pay when your insured order arrives.</small></span
+              >
+              <span aria-hidden="true">₹</span>
+            </label>
+            <div class="cl-assurance">
+              <strong>No online payment required.</strong>
+              <p>We will call to confirm your order before dispatch.</p>
+            </div>
+            @if (submitError()) {
+              <p class="cl-alert" role="alert">{{ submitError() }}</p>
+            }
+            <div class="cl-checkout-actions">
+              <button class="cl-button cl-button--light" type="button" (click)="goBack()">
+                Back
+              </button>
+              <button
+                class="cl-button cl-button--dark"
+                type="button"
+                [disabled]="submitting()"
+                (click)="placeOrder()"
+              >
+                {{ submitting() ? 'Placing order…' : 'Place cash on delivery order' }}
+              </button>
+            </div>
+          }
+        </section>
+
+        <aside
+          class="cl-order-summary cl-order-summary--checkout"
+          aria-labelledby="checkout-summary-heading"
+        >
+          <p class="cl-eyebrow">Your order</p>
+          <h2 id="checkout-summary-heading">{{ cart.itemCount() }} pieces</h2>
+          <div class="cl-mini-lines">
+            @for (item of cart.items(); track item.product.id) {
+              <div class="cl-mini-line">
+                <img [src]="productImage(item.product)" [alt]="item.product.name" />
+                <div>
+                  <strong>{{ item.product.name }}</strong><span>Qty {{ item.quantity }}</span>
+                </div>
+                <span>{{
+                  productPrice(item.product) * item.quantity | currency: 'INR' : 'symbol' : '1.0-2'
+                }}</span>
+              </div>
+            }
+          </div>
+          <dl>
+            <div>
+              <dt>Metal value</dt>
+              <dd>{{ cart.metalValue() | currency: 'INR' : 'symbol' : '1.0-2' }}</dd>
+            </div>
+            <div>
+              <dt>Making charges</dt>
+              <dd>{{ cart.makingCharges() | currency: 'INR' : 'symbol' : '1.0-2' }}</dd>
+            </div>
+            <div>
+              <dt>Insured shipping</dt>
+              <dd>{{ cart.shippingCharges() | currency: 'INR' : 'symbol' : '1.0-2' }}</dd>
+            </div>
+            <div>
+              <dt>Applicable taxes</dt>
+              <dd>{{ cart.taxTotal() | currency: 'INR' : 'symbol' : '1.0-2' }}</dd>
+            </div>
+            <div class="cl-order-summary__total">
+              <dt>Total</dt>
+              <dd>{{ cart.total() | currency: 'INR' : 'symbol' : '1.0-2' }}</dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    }
+  </div>
+</main>

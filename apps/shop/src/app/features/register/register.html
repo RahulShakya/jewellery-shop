@@ -1,0 +1,88 @@
+<main class="cl-login-page">
+  <section class="cl-login-visual">
+    <img src="assets/images/hero-jewellery.png" alt="Carat Line gold jewellery" />
+    <div>
+      <p class="cl-eyebrow">Begin your collection</p>
+      <blockquote>“Jewellery is a story you can wear.”</blockquote>
+    </div>
+  </section>
+  <section class="cl-login-panel">
+    <a class="cl-text-link" routerLink="/">← Back to shop</a>
+    @if (auth.isAuthenticated()) {
+      <div class="cl-login-welcome">
+        <p class="cl-eyebrow">Account ready</p>
+        <h1>Hello, {{ auth.currentUser()?.name }}</h1>
+        <p>Your Carat Line account is already signed in.</p>
+        <button class="cl-button cl-button--dark" type="button" (click)="continue()">
+          Continue
+        </button>
+      </div>
+    } @else {
+      <div class="cl-login-form-wrap">
+        <p class="cl-eyebrow">Your Carat Line account</p>
+        <h1>Create your account</h1>
+        <p>Register to place orders securely and keep your order history connected to you.</p>
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <label class="cl-field">
+            <span>Full name</span>
+            <input type="text" formControlName="name" autocomplete="name" />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+              <small>Please enter your full name.</small>
+            }
+          </label>
+          <label class="cl-field">
+            <span>Email address</span>
+            <input type="email" formControlName="email" autocomplete="email" />
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <small>Please enter a valid email.</small>
+            }
+          </label>
+          <label class="cl-field">
+            <span>Password</span>
+            <span class="cl-password-field">
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                autocomplete="new-password"
+              />
+              <button type="button" (click)="showPassword.update((show) => !show)">
+                {{ showPassword() ? 'Hide' : 'Show' }}
+              </button>
+            </span>
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              <small>Password must be at least 8 characters.</small>
+            }
+          </label>
+          <label class="cl-field">
+            <span>Confirm password</span>
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password_confirmation"
+              autocomplete="new-password"
+            />
+            @if (
+              form.controls.password_confirmation.touched &&
+              (form.controls.password_confirmation.invalid || form.hasError('passwordsMismatch'))
+            ) {
+              <small>The passwords must match.</small>
+            }
+          </label>
+          @if (auth.error()) {
+            <p class="cl-alert" role="alert">{{ auth.error() }}</p>
+          }
+          <button
+            class="cl-button cl-button--dark cl-button--full"
+            type="submit"
+            [disabled]="auth.loading()"
+          >
+            {{ auth.loading() ? 'Creating account…' : 'Create account' }}
+          </button>
+        </form>
+        <p class="cl-login-help">
+          Already registered?
+          <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl }">Sign in</a>
+        </p>
+      </div>
+    }
+  </section>
+</main>

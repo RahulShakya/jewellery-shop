@@ -1,0 +1,38 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@carat-line/api": ["./libs/shared/api/src/index.ts"],
+      "@carat-line/models": ["./libs/shared/models/src/index.ts"],
+      "@carat-line/ui": ["./libs/shared/ui/src/index.ts"],
+      "@carat-line/cart-data": ["./libs/checkout/data-access/src/index.ts"],
+      "@carat-line/product-ui": ["./libs/products/ui/src/index.ts"],
+      "@carat-line/products-data": ["./libs/products/data-access/src/index.ts"],
+      "@carat-line/products-list": ["./libs/products/feature-list/src/index.ts"],
+      "@carat-line/products-manage": ["./libs/products/feature-manage/src/index.ts"],
+      "@carat-line/cart": ["./libs/checkout/feature-cart/src/index.ts"],
+      "@carat-line/checkout": ["./libs/checkout/feature-checkout/src/index.ts"],
+      "@carat-line/auth": ["./libs/shared/auth/src/index.ts"]
+    },
+    "rootDir": "."
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  },
+  "exclude": ["node_modules", "tmp", "api"]
+}

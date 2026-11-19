@@ -1,0 +1,110 @@
+<section class="admin-page" aria-labelledby="dashboard-heading">
+  <div class="page-intro">
+    <div>
+      <h2 id="dashboard-heading">A clear view of your store</h2>
+      <p>Track the details that need your attention today.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button secondary" routerLink="/orders">Review orders</a>
+      <a class="button" routerLink="/products">Manage products <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="stats-grid" aria-label="Loading dashboard">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="stat-card">
+          <div class="loading-lines"><span></span></div>
+        </div>
+      }
+    </div>
+  } @else if (errorMessage()) {
+    <div class="data-panel state-card" role="alert">
+      <div class="state-content">
+        <span class="state-icon" aria-hidden="true">!</span>
+        <h3>Dashboard data is unavailable</h3>
+        <p>{{ errorMessage() }}</p>
+        <button class="button secondary" type="button" (click)="loadDashboard()">Try again</button>
+      </div>
+    </div>
+  } @else {
+    <div class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Gross revenue</span>
+        <strong class="stat-value">{{
+          summary().revenue | currency: 'INR' : 'symbol' : '1.0-0'
+        }}</strong>
+        <span class="stat-detail">Across non-cancelled orders</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Total orders</span>
+        <strong class="stat-value">{{ summary().orders | number }}</strong>
+        <span class="stat-detail">{{ summary().pending_orders }} awaiting action</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Active products</span>
+        <strong class="stat-value">{{ summary().products | number }}</strong>
+        <span class="stat-detail">{{ summary().low_stock }} low in stock</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Customers</span>
+        <strong class="stat-value">{{ summary().customers | number }}</strong>
+        <span class="stat-detail">Unique ordering customers</span>
+      </article>
+    </div>
+
+    <section class="data-panel" aria-labelledby="recent-orders-heading">
+      <header class="panel-heading">
+        <div>
+          <h3 id="recent-orders-heading">Recent orders</h3>
+          <p>The latest purchases across your storefront.</p>
+        </div>
+        <a class="button secondary small" routerLink="/orders">View all</a>
+      </header>
+
+      @if (summary().recent_orders.length) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Order</th>
+                <th scope="col">Customer</th>
+                <th scope="col">Placed</th>
+                <th scope="col">Total</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of summary().recent_orders; track order.id) {
+                <tr>
+                  <td>
+                    <span class="table-primary">{{ order.order_number }}</span>
+                  </td>
+                  <td>
+                    <span class="table-primary">{{ order.customer_name }}</span>
+                    <span class="table-secondary">{{
+                      order.customer_email || order.customer_phone
+                    }}</span>
+                  </td>
+                  <td>{{ order.created_at | date: 'mediumDate' }}</td>
+                  <td>{{ order.total | currency: 'INR' }}</td>
+                  <td>
+                    <span [class]="'status-badge ' + order.status">{{ order.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="state-card">
+          <div class="state-content">
+            <span class="state-icon" aria-hidden="true">◇</span>
+            <h3>No orders yet</h3>
+            <p>New storefront orders will appear here as soon as they are placed.</p>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</section>

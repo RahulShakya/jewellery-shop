@@ -1,0 +1,110 @@
+<section class="admin-page category-form-page" aria-labelledby="category-page-heading">
+  <div class="page-intro">
+    <div>
+      <button class="back-link" type="button" [disabled]="saving()" (click)="cancel()">
+        <span aria-hidden="true">←</span> Back to categories
+      </button>
+      <h2 id="category-page-heading">{{ editing ? 'Edit category' : 'Add category' }}</h2>
+      <p>
+        {{
+          editing
+            ? 'Update how this category appears across the storefront.'
+            : 'Create a category customers can use to browse your collection.'
+        }}
+      </p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <section class="data-panel" aria-label="Loading category">
+      <div class="loading-lines"><span></span><span></span><span></span></div>
+    </section>
+  } @else if (loadError()) {
+    <section class="data-panel">
+      <div class="state-card" role="alert">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h3>Category could not be loaded</h3>
+          <p>{{ loadError() }}</p>
+          <button class="button secondary" type="button" (click)="cancel()">
+            Back to categories
+          </button>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="data-panel" aria-labelledby="category-form-heading">
+      <header class="panel-heading">
+        <div>
+          <h3 id="category-form-heading">Category details</h3>
+          <p>Use a clear name and image customers will recognise.</p>
+        </div>
+      </header>
+
+      <form class="entity-form" [formGroup]="form" (ngSubmit)="saveCategory()" novalidate>
+        <label class="form-field">
+          <span>Category name</span>
+          <input type="text" formControlName="name" (input)="updateSlugFromName()" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <small>A category name is required.</small>
+          }
+        </label>
+
+        <label class="form-field">
+          <span>URL slug</span>
+          <input type="text" formControlName="slug" />
+          @if (form.controls.slug.touched && form.controls.slug.invalid) {
+            <small>Use lowercase letters, numbers and hyphens only.</small>
+          }
+        </label>
+
+        <div class="form-field full">
+          <span>Category image</span>
+          <div class="image-upload">
+            <span class="image-upload-preview">
+              @if (categoryImagePreview(); as imageUrl) {
+                <img [src]="imageUrl" alt="Category image preview" />
+              } @else {
+                <span aria-hidden="true">◇</span>
+              }
+            </span>
+            <label class="image-upload-control">
+              <span>{{ editing ? 'Replace image' : 'Choose image' }}</span>
+              <input type="file" [accept]="acceptedImageTypes" (change)="selectImage($event)" />
+              <small class="image-upload-help">JPG, PNG or WebP. Maximum 5 MB.</small>
+              @if (selectedImage(); as image) {
+                <strong>{{ image.name }}</strong>
+              }
+            </label>
+          </div>
+          @if (imageError()) {
+            <small>{{ imageError() }}</small>
+          }
+        </div>
+
+        <label class="form-field full">
+          <span>Description</span>
+          <textarea formControlName="description"></textarea>
+        </label>
+
+        <label class="check-row">
+          <input type="checkbox" formControlName="is_active" />
+          Available in storefront navigation
+        </label>
+
+        @if (formError()) {
+          <div class="dialog-error" role="alert">{{ formError() }}</div>
+        }
+
+        <div class="form-page-actions">
+          <button class="button secondary" type="button" [disabled]="saving()" (click)="cancel()">
+            Cancel
+          </button>
+          <button class="button" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : editing ? 'Save changes' : 'Add category' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+</section>

@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.cl-price-breakdown {
+  margin: 1.5rem 0;
+  border-block: 1px solid var(--cl-line);
+  padding: 1rem 0;
+}
+
+.cl-price-breakdown div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.35rem 0;
+  color: var(--cl-muted);
+  font-size: 0.72rem;
+}
+
+.cl-price-breakdown small {
+  font-size: inherit;
+}
+
+.cl-price-breakdown strong {
+  color: var(--cl-ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.cl-price-breakdown .cl-price-breakdown__subtotal {
+  margin-top: 0.35rem;
+  border-top: 1px solid var(--cl-line);
+  padding-top: 0.7rem;
+}
+
+.cl-price-breakdown .cl-price-breakdown__total {
+  margin-top: 0.35rem;
+  border-top: 1px solid var(--cl-ink);
+  padding-top: 0.7rem;
+  color: var(--cl-ink);
+  font-size: 0.78rem;
+}

@@ -1,0 +1,16 @@
+import { provideHttpClient } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { App } from './app';
+
+describe('App', () => {
+  it('renders the Carat Line storefront shell', async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [provideHttpClient(), provideRouter([])],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('.cl-brand')?.textContent).toContain('CARAT');
+  });
+});

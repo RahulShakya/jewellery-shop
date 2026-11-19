@@ -1,0 +1,326 @@
+<section class="admin-page" aria-labelledby="products-heading">
+  <div class="page-intro">
+    <div>
+      <h2 id="products-heading">Product catalogue</h2>
+      <p>Manage the pieces, prices and inventory shown in the storefront.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button" routerLink="/products/new">
+        <span aria-hidden="true">+</span> Add product
+      </a>
+    </div>
+  </div>
+
+  @if (errorMessage() && products().length) {
+    <div class="dialog-error" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="data-panel" aria-label="Products">
+    <div class="table-toolbar">
+      <label class="search-field">
+        <span class="sr-only">Search products</span>
+        <input
+          type="search"
+          placeholder="Search by name or SKU"
+          [value]="searchTerm()"
+          (input)="searchProducts($any($event.target).value)"
+        />
+      </label>
+      <label class="form-field select category-filter">
+        <span class="sr-only">Filter by category</span>
+        <select
+          [value]="selectedCategoryId()"
+          (change)="filterByCategory($any($event.target).value)"
+        >
+          <option [value]="0">All categories</option>
+          @for (category of categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </label>
+      <span class="table-secondary">{{ totalProducts() }} products</span>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-lines" aria-label="Loading products">
+        <span></span><span></span><span></span><span></span>
+      </div>
+    } @else if (errorMessage() && !products().length) {
+      <div class="state-card" role="alert">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h3>Products could not be loaded</h3>
+          <p>{{ errorMessage() }}</p>
+          <button class="button secondary" type="button" (click)="loadProducts()">Try again</button>
+        </div>
+      </div>
+    } @else if (!products().length) {
+      <div class="state-card">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">◇</span>
+          <h3>{{ searchTerm() ? 'No matching products' : 'Your catalogue is ready to begin' }}</h3>
+          <p>
+            {{
+              searchTerm()
+                ? 'Try a different product name, SKU or category.'
+                : 'Add your first jewellery piece to make it available for the storefront.'
+            }}
+          </p>
+          @if (!searchTerm()) {
+            <a class="button" routerLink="/products/new">Add first product</a>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Category</th>
+              <th scope="col">Metal / weight</th>
+              <th scope="col">Price</th>
+              <th scope="col">Stock</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products(); track product.id) {
+              <tr>
+                <td>
+                  <div class="product-cell">
+                    <span class="product-thumb">
+                      @if (product.image_url || product.image) {
+                        <img [src]="product.image_url || product.image" alt="" />
+                      } @else {
+                        <span aria-hidden="true">◇</span>
+                      }
+                    </span>
+                    <span>
+                      <span class="table-primary">{{ product.name }}</span>
+                      <span class="table-secondary">{{ product.sku || product.slug }}</span>
+                    </span>
+                  </div>
+                </td>
+                <td>{{ product.category?.name || 'Uncategorised' }}</td>
+                <td>
+                  <span class="table-primary">{{
+                    product.metal_type || product.material || '—'
+                  }}</span>
+                  <span class="table-secondary">
+                    {{ product.weight_grams ?? product.weight ?? 0 | number: '1.0-3' }} g
+                  </span>
+                </td>
+                <td>
+                  <span class="table-primary">{{ displayPrice(product) | currency: 'INR' }}</span>
+                  <span class="table-secondary">Calculated price</span>
+                </td>
+                <td>
+                  <span class="table-primary">{{ product.stock | number }}</span>
+                  @if (product.stock <= 5) {
+                    <span class="table-secondary">Low stock</span>
+                  }
+                </td>
+                <td>
+                  <span [class]="'status-badge ' + (isAvailable(product) ? 'active' : 'inactive')">
+                    {{ availabilityLabel(product) }}
+                  </span>
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <button
+                      class="icon-action text"
+                      type="button"
+                      aria-label="View {{ product.name }}"
+                      (click)="openView(product)"
+                    >
+                      View
+                    </button>
+                    <a
+                      class="icon-action"
+                      aria-label="Edit {{ product.name }}"
+                      [routerLink]="['/products', product.id, 'edit']"
+                    >
+                      ✎
+                    </a>
+                    <button
+                      class="icon-action danger"
+                      type="button"
+                      aria-label="Delete {{ product.name }}"
+                      (click)="confirmDelete(product)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (!loading() && products().length) {
+      <footer class="table-pagination">
+        <lib-pagination
+          [page]="currentPage()"
+          [total]="totalProducts()"
+          [perPage]="perPage"
+          (pageChange)="loadProducts($event)"
+        />
+      </footer>
+    }
+  </section>
+</section>
+
+@if (viewingProduct(); as product) {
+  <div
+    class="form-overlay"
+    role="presentation"
+    (click)="$event.target === $event.currentTarget && closeView()"
+  >
+    <section
+      class="form-dialog product-view-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-view-heading"
+    >
+      <header class="dialog-heading">
+        <div>
+          <h3 id="product-view-heading">{{ product.name }}</h3>
+          <p>{{ product.sku || product.slug }} · {{ product.category?.name || 'Uncategorised' }}</p>
+        </div>
+        <button class="dialog-close" type="button" aria-label="Close" (click)="closeView()">
+          ×
+        </button>
+      </header>
+
+      <div class="product-view-content">
+        <div class="product-view-lead">
+          <div class="product-view-image">
+            @if (product.image_url || product.image) {
+              <img [src]="product.image_url || product.image" [alt]="product.name" />
+            } @else {
+              <span aria-hidden="true">◇</span>
+            }
+          </div>
+          <div>
+            <span [class]="'status-badge ' + (isAvailable(product) ? 'active' : 'inactive')">
+              {{ availabilityLabel(product) }}
+            </span>
+            <p>{{ product.description || 'No description has been added.' }}</p>
+          </div>
+        </div>
+
+        <dl class="product-facts">
+          <div>
+            <dt>Metal type</dt>
+            <dd>{{ product.metal_type || product.material || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Purity</dt>
+            <dd>{{ product.purity || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Weight</dt>
+            <dd>{{ product.weight_grams ?? product.weight ?? 0 | number: '1.0-3' }} g</dd>
+          </div>
+          <div>
+            <dt>Stock</dt>
+            <dd>{{ product.stock | number }}</dd>
+          </div>
+          <div>
+            <dt>Current metal rate</dt>
+            <dd>{{ product.metal_price_per_gram ?? 0 | currency: 'INR' }} / g</dd>
+          </div>
+          <div>
+            <dt>Featured</dt>
+            <dd>{{ product.is_featured ? 'Yes' : 'No' }}</dd>
+          </div>
+        </dl>
+
+        @if (viewedPrice(); as price) {
+          <section class="pricing-card" aria-label="Price breakdown">
+            <div class="pricing-card-heading">
+              <div>
+                <span>Final item price</span>
+                <strong>{{ displayPrice(product) | currency: 'INR' }}</strong>
+              </div>
+            </div>
+            <dl class="pricing-breakdown">
+              <div>
+                <dt>Metal value</dt>
+                <dd>{{ price.metal_value | currency: 'INR' }}</dd>
+              </div>
+              <div>
+                <dt>Making charges</dt>
+                <dd>{{ price.making_charges | currency: 'INR' }}</dd>
+              </div>
+              <div>
+                <dt>Shipping</dt>
+                <dd>{{ price.shipping_charges | currency: 'INR' }}</dd>
+              </div>
+              <div class="subtotal">
+                <dt>Pre-tax subtotal</dt>
+                <dd>{{ price.subtotal | currency: 'INR' }}</dd>
+              </div>
+              @for (tax of price.taxes; track $index) {
+                <div>
+                  <dt>{{ tax.name }} ({{ tax.rate | number: '1.0-2' }}%)</dt>
+                  <dd>{{ tax.amount ?? 0 | currency: 'INR' }}</dd>
+                </div>
+              }
+              <div>
+                <dt>Total tax</dt>
+                <dd>{{ price.tax_total | currency: 'INR' }}</dd>
+              </div>
+              <div class="total">
+                <dt>Final price</dt>
+                <dd>{{ displayPrice(product) | currency: 'INR' }}</dd>
+              </div>
+            </dl>
+          </section>
+        }
+      </div>
+
+      <footer class="dialog-actions product-view-actions">
+        <button class="button secondary" type="button" (click)="closeView()">Close</button>
+        <a class="button" [routerLink]="['/products', product.id, 'edit']">Edit product</a>
+      </footer>
+    </section>
+  </div>
+}
+
+@if (productToDelete(); as product) {
+  <div class="form-overlay">
+    <section
+      class="form-dialog confirm-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-product-heading"
+    >
+      <span class="state-icon" aria-hidden="true">!</span>
+      <h3 id="delete-product-heading">Delete {{ product.name }}?</h3>
+      <p>This removes the product from the catalogue. This action cannot be undone.</p>
+      <div class="page-actions">
+        <button
+          class="button secondary"
+          type="button"
+          [disabled]="deleting()"
+          (click)="productToDelete.set(null)"
+        >
+          Cancel
+        </button>
+        <button
+          class="button danger"
+          type="button"
+          [disabled]="deleting()"
+          (click)="deleteProduct()"
+        >
+          {{ deleting() ? 'Deleting…' : 'Delete product' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

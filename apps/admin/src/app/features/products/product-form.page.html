@@ -1,0 +1,249 @@
+<section class="admin-page product-form-page" aria-labelledby="product-page-heading">
+  <div class="page-intro">
+    <div>
+      <button class="back-link" type="button" [disabled]="saving()" (click)="cancel()">
+        <span aria-hidden="true">←</span> Back to products
+      </button>
+      <h2 id="product-page-heading">{{ editing ? 'Edit product' : 'Add product' }}</h2>
+      <p>
+        {{
+          editing
+            ? 'Update catalogue, pricing and inventory information.'
+            : 'Add a new jewellery piece to your storefront catalogue.'
+        }}
+      </p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <section class="data-panel" aria-label="Loading product form">
+      <div class="loading-lines"><span></span><span></span><span></span></div>
+    </section>
+  } @else if (loadError()) {
+    <section class="data-panel">
+      <div class="state-card" role="alert">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h3>Product form could not be loaded</h3>
+          <p>{{ loadError() }}</p>
+          <button class="button secondary" type="button" (click)="cancel()">
+            Back to products
+          </button>
+        </div>
+      </div>
+    </section>
+  } @else {
+    <section class="data-panel" aria-labelledby="product-form-heading">
+      <header class="panel-heading">
+        <div>
+          <h3 id="product-form-heading">Product details</h3>
+          <p>Keep catalogue information accurate and customer-ready.</p>
+        </div>
+      </header>
+
+      <form class="entity-form" [formGroup]="form" (ngSubmit)="saveProduct()" novalidate>
+        <label class="form-field">
+          <span>Product name</span>
+          <input type="text" formControlName="name" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <small>A product name is required.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>SKU</span>
+          <input type="text" formControlName="sku" />
+          @if (form.controls.sku.touched && form.controls.sku.invalid) {
+            <small>A unique SKU is required.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Category</span>
+          <select formControlName="category_id">
+            <option [value]="0" disabled>Select category</option>
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.name }}</option>
+            }
+          </select>
+          @if (form.controls.category_id.touched && form.controls.category_id.invalid) {
+            <small>Select a category.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Stock</span>
+          <input type="number" min="0" step="1" formControlName="stock" />
+          @if (form.controls.stock.touched && form.controls.stock.invalid) {
+            <small>Stock must be a whole number of zero or more.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Metal type</span>
+          <input type="text" formControlName="metal_type" placeholder="e.g. 18K yellow gold" />
+          @if (form.controls.metal_type.touched && form.controls.metal_type.invalid) {
+            <small>A metal type is required.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Purity</span>
+          <input type="text" formControlName="purity" placeholder="e.g. 750" />
+        </label>
+        <label class="form-field">
+          <span>Weight (grams)</span>
+          <input type="number" min="0.001" step="0.001" formControlName="weight_grams" />
+          @if (form.controls.weight_grams.touched && form.controls.weight_grams.invalid) {
+            <small>Enter a weight greater than zero.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Current metal price (₹ per gram)</span>
+          <input type="number" min="0.01" step="0.01" formControlName="metal_price_per_gram" />
+          @if (
+            form.controls.metal_price_per_gram.touched && form.controls.metal_price_per_gram.invalid
+          ) {
+            <small>Enter the current price per gram.</small>
+          }
+        </label>
+        <label class="form-field">
+          <span>Making charges (₹)</span>
+          <input type="number" min="0" step="0.01" formControlName="making_charges" />
+        </label>
+        <label class="form-field">
+          <span>Shipping charges (₹)</span>
+          <input type="number" min="0" step="0.01" formControlName="shipping_charges" />
+        </label>
+
+        <fieldset class="tax-editor full" formArrayName="taxes">
+          <div class="tax-editor-heading">
+            <div>
+              <legend>Applicable taxes</legend>
+              <p>Each tax is calculated on metal value, making charges and shipping.</p>
+            </div>
+            <button class="button secondary small" type="button" (click)="addTax()">Add tax</button>
+          </div>
+          <div class="tax-list">
+            @for (tax of taxControls; track tax; let index = $index) {
+              <div class="tax-row" [formGroupName]="index">
+                <label class="form-field">
+                  <span>Tax name</span>
+                  <input type="text" formControlName="name" placeholder="e.g. GST" />
+                  @if (tax.controls.name.touched && tax.controls.name.invalid) {
+                    <small>A tax name is required.</small>
+                  }
+                </label>
+                <label class="form-field">
+                  <span>Rate (%)</span>
+                  <input type="number" min="0" max="100" step="0.01" formControlName="rate" />
+                  @if (tax.controls.rate.touched && tax.controls.rate.invalid) {
+                    <small>Use a rate from 0 to 100.</small>
+                  }
+                </label>
+                <button
+                  class="icon-action danger tax-remove"
+                  type="button"
+                  [disabled]="taxControls.length === 1"
+                  [attr.aria-label]="'Remove tax ' + (index + 1)"
+                  (click)="removeTax(index)"
+                >
+                  ×
+                </button>
+              </div>
+            }
+          </div>
+        </fieldset>
+
+        @if (pricingPreview(); as price) {
+          <section class="pricing-card full" aria-live="polite" aria-label="Calculated price">
+            <div class="pricing-card-heading">
+              <div>
+                <span>Calculated final price</span>
+                <strong>{{ price.final_price | currency: 'INR' }}</strong>
+              </div>
+              <p>Final prices are recalculated and verified by the API when saved.</p>
+            </div>
+            <dl class="pricing-breakdown">
+              <div>
+                <dt>Metal value</dt>
+                <dd>{{ price.metal_value | currency: 'INR' }}</dd>
+              </div>
+              <div>
+                <dt>Making charges</dt>
+                <dd>{{ price.making_charges | currency: 'INR' }}</dd>
+              </div>
+              <div>
+                <dt>Shipping</dt>
+                <dd>{{ price.shipping_charges | currency: 'INR' }}</dd>
+              </div>
+              <div class="subtotal">
+                <dt>Pre-tax subtotal</dt>
+                <dd>{{ price.subtotal | currency: 'INR' }}</dd>
+              </div>
+              @for (tax of price.taxes; track $index) {
+                <div>
+                  <dt>
+                    {{ tax.name || 'Tax ' + ($index + 1) }} ({{ tax.rate | number: '1.0-2' }}%)
+                  </dt>
+                  <dd>{{ tax.amount | currency: 'INR' }}</dd>
+                </div>
+              }
+              <div class="total">
+                <dt>Total</dt>
+                <dd>{{ price.final_price | currency: 'INR' }}</dd>
+              </div>
+            </dl>
+          </section>
+        }
+
+        <div class="form-field full">
+          <span>Product image</span>
+          <div class="image-upload">
+            <span class="image-upload-preview">
+              @if (productImagePreview(); as imageUrl) {
+                <img [src]="imageUrl" alt="Product image preview" />
+              } @else {
+                <span aria-hidden="true">◇</span>
+              }
+            </span>
+            <label class="image-upload-control">
+              <span>{{ editing ? 'Replace image' : 'Choose image' }}</span>
+              <input type="file" [accept]="acceptedImageTypes" (change)="selectImage($event)" />
+              <small class="image-upload-help">JPG, PNG or WebP. Maximum 5 MB.</small>
+              @if (selectedImage(); as image) {
+                <strong>{{ image.name }}</strong>
+              }
+            </label>
+          </div>
+          @if (imageError()) {
+            <small>{{ imageError() }}</small>
+          }
+        </div>
+
+        <label class="form-field full">
+          <span>Description</span>
+          <textarea formControlName="description"></textarea>
+          @if (form.controls.description.touched && form.controls.description.invalid) {
+            <small>A description is required.</small>
+          }
+        </label>
+
+        <label class="check-row">
+          <input type="checkbox" formControlName="is_active" /> Available in storefront
+        </label>
+        <label class="check-row">
+          <input type="checkbox" formControlName="is_featured" /> Feature this product
+        </label>
+
+        @if (formError()) {
+          <div class="dialog-error" role="alert">{{ formError() }}</div>
+        }
+
+        <div class="form-page-actions">
+          <button class="button secondary" type="button" [disabled]="saving()" (click)="cancel()">
+            Cancel
+          </button>
+          <button class="button" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : editing ? 'Save changes' : 'Add product' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+</section>

@@ -1,0 +1,10 @@
+{
+  "name": "feature-manage",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/products/feature-manage/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:admin", "type:feature"],
+  "// targets": "to see all targets run: nx show project feature-manage --web",
+  "targets": {}
+}

@@ -1,0 +1,39 @@
+<article class="cl-product-card">
+  <div class="cl-product-card__media">
+    <a [routerLink]="['/products', product().slug]" [attr.aria-label]="'View ' + product().name">
+      <img [src]="productImage(product())" [alt]="product().name" loading="lazy" />
+    </a>
+    @if (productOriginalPrice(product())) {
+      <span class="cl-product-card__badge">Special price</span>
+    }
+    <button
+      class="cl-icon-button cl-product-card__wish"
+      type="button"
+      [attr.aria-label]="wishlist.has(product().id) ? 'Remove from wishlist' : 'Add to wishlist'"
+      [attr.aria-pressed]="wishlist.has(product().id)"
+      (click)="wishlist.toggle(product())"
+    >
+      {{ wishlist.has(product().id) ? '♥' : '♡' }}
+    </button>
+  </div>
+  <div class="cl-product-card__body">
+    <p class="cl-kicker">{{ productCategoryName(product()) }}</p>
+    <h3>
+      <a [routerLink]="['/products', product().slug]">{{ product().name }}</a>
+    </h3>
+    <div class="cl-product-card__price">
+      <strong>{{ productPrice(product()) | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+      @if (productOriginalPrice(product()); as original) {
+        <s>{{ original | currency: 'INR' : 'symbol' : '1.0-2' }}</s>
+      }
+    </div>
+    <button
+      class="cl-product-card__add"
+      type="button"
+      [disabled]="product().stock < 1"
+      (click)="addToBag()"
+    >
+      {{ product().stock < 1 ? 'Made to order' : added() ? 'Added to bag ✓' : 'Add to bag' }}
+    </button>
+  </div>
+</article>

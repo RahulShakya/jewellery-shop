@@ -1,0 +1,77 @@
+<div class="admin-layout" [class.menu-open]="menuOpen()">
+  <aside class="sidebar" id="admin-sidebar" aria-label="Admin navigation">
+    <a
+      class="brand"
+      routerLink="/dashboard"
+      (click)="closeMenu()"
+      aria-label="CaratLine admin home"
+    >
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span>
+        <strong>CaratLine</strong>
+        <small>Admin</small>
+      </span>
+    </a>
+
+    <nav class="primary-navigation">
+      <span class="nav-label">Workspace</span>
+      @for (item of navigation; track item.route) {
+        <a
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.exact }"
+          (click)="closeMenu()"
+        >
+          <span class="nav-icon" [attr.data-icon]="item.icon" aria-hidden="true"></span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="avatar" aria-hidden="true">{{ userInitial() }}</span>
+      <span class="account-copy">
+        <strong>{{ userName() }}</strong>
+        <small>{{ auth.currentUser()?.email ?? 'Admin account' }}</small>
+      </span>
+      <button
+        class="icon-button logout-button"
+        type="button"
+        aria-label="Sign out"
+        [disabled]="loggingOut()"
+        (click)="logout()"
+      >
+        <span aria-hidden="true">↗</span>
+      </button>
+    </div>
+  </aside>
+
+  @if (menuOpen()) {
+    <button
+      class="sidebar-backdrop"
+      type="button"
+      aria-label="Close navigation"
+      (click)="closeMenu()"
+    ></button>
+  }
+
+  <section class="workspace">
+    <header class="topbar">
+      <button
+        class="icon-button menu-button"
+        type="button"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="admin-sidebar"
+        aria-label="Open navigation"
+        (click)="toggleMenu()"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <main class="page-content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </section>
+</div>

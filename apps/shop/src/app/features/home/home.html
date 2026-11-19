@@ -1,0 +1,142 @@
+<main>
+  <section class="cl-hero">
+    <img
+      src="assets/images/hero-jewellery.png"
+      alt="Fine gold jewellery arranged on warm sculptural silk"
+    />
+    <div class="cl-hero__shade"></div>
+    <div class="cl-container cl-hero__content">
+      <p class="cl-eyebrow">The festive edit · 2026</p>
+      <h1>Jewels that<br /><em>hold a story</em></h1>
+      <p>
+        Modern heirlooms, handcrafted in gold and set with stones chosen for their singular beauty.
+      </p>
+      <div>
+        <a class="cl-button cl-button--cream" routerLink="/products">Explore the collection</a
+        ><a class="cl-hero__link" routerLink="/products" [queryParams]="{ sort: 'newest' }"
+          >Discover new arrivals <span>→</span></a
+        >
+      </div>
+    </div>
+    <p class="cl-hero__caption">The Festive Edit · Carat Line 2026</p>
+  </section>
+
+  <section class="cl-section cl-categories-section">
+    <div class="cl-container">
+      <header class="cl-section-heading">
+        <div>
+          <p class="cl-eyebrow">Find your piece</p>
+          <h2>Shop by category</h2>
+        </div>
+        <a class="cl-text-link" routerLink="/products">View all jewellery</a>
+      </header>
+      <div class="cl-category-grid">
+        @for (category of categories(); track category.id) {
+          <a
+            class="cl-category-tile"
+            routerLink="/products"
+            [queryParams]="{ category: category.slug }"
+          >
+            <span class="cl-category-tile__art"
+              ><i>◇</i><b>{{ category.name.charAt(0) }}</b></span
+            >
+            <span
+              ><strong>{{ category.name }}</strong
+              ><small>Explore collection →</small></span
+            >
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="cl-section cl-featured-section">
+    <div class="cl-container">
+      <header class="cl-section-heading cl-section-heading--center">
+        <div>
+          <p class="cl-eyebrow">Chosen for you</p>
+          <h2>Signature pieces</h2>
+          <p>Quietly distinctive. Effortlessly yours.</p>
+        </div>
+      </header>
+      @if (loading()) {
+        <div class="cl-product-grid">
+          @for (item of [1, 2, 3, 4]; track item) {
+            <div class="cl-product-skeleton"><span></span><span></span><span></span></div>
+          }
+        </div>
+      } @else if (featured().length) {
+        <div class="cl-product-grid">
+          @for (product of featured(); track product.id) {
+            <lib-product-card [product]="product" />
+          }
+        </div>
+        <div class="cl-section-cta">
+          <a class="cl-button cl-button--outline" routerLink="/products"
+            >View the full collection</a
+          >
+        </div>
+      } @else {
+        <div class="cl-empty-state cl-empty-state--compact">
+          <p>Our newest pieces are being prepared for you.</p>
+          <a class="cl-text-link" routerLink="/products">Browse the collection</a>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="cl-story-section">
+    <div class="cl-story-section__image">
+      <img
+        src="assets/images/hero-jewellery.png"
+        alt="Gold jewellery detail from the Carat Line atelier"
+        loading="lazy"
+      />
+    </div>
+    <div class="cl-story-section__copy">
+      <p class="cl-eyebrow">Made with meaning</p>
+      <h2>From our hands,<br /><em>to your story</em></h2>
+      <p>
+        Every Carat Line piece begins as a conversation between material and maker. Our artisans
+        shape each detail by hand, honouring generations of Indian craft through a distinctly modern
+        lens.
+      </p>
+      <a class="cl-text-link" href="#craft">Discover our craft</a>
+      <dl>
+        <div>
+          <dt>100%</dt>
+          <dd>Certified gold</dd>
+        </div>
+        <div>
+          <dt>35+</dt>
+          <dd>Master artisans</dd>
+        </div>
+        <div>
+          <dt>7 days</dt>
+          <dd>Easy returns</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="cl-values-strip" aria-label="Carat Line promises">
+    <div class="cl-container">
+      <div>
+        <span>◇</span>
+        <p><strong>BIS Hallmarked</strong><small>Certified precious metals</small></p>
+      </div>
+      <div>
+        <span>✦</span>
+        <p><strong>Ethically sourced</strong><small>Stones chosen with care</small></p>
+      </div>
+      <div>
+        <span>♢</span>
+        <p><strong>Insured delivery</strong><small>Complimentary across India</small></p>
+      </div>
+      <div>
+        <span>↻</span>
+        <p><strong>7-day returns</strong><small>Shop with confidence</small></p>
+      </div>
+    </div>
+  </section>
+</main>

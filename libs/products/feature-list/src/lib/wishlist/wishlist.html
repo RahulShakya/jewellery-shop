@@ -1,0 +1,28 @@
+<main class="cl-page">
+  <div class="cl-container">
+    <nav class="cl-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a><span aria-hidden="true">/</span><span>Wishlist</span>
+    </nav>
+    <header class="cl-page-heading cl-page-heading--row">
+      <div>
+        <p class="cl-eyebrow">Saved for later</p>
+        <h1>Your wishlist</h1>
+      </div>
+      <p>{{ wishlist.count() }} {{ wishlist.count() === 1 ? 'piece' : 'pieces' }}</p>
+    </header>
+    @if (wishlist.count() === 0) {
+      <section class="cl-empty-state">
+        <span class="cl-empty-state__icon" aria-hidden="true">♡</span>
+        <h2>Save the pieces you love</h2>
+        <p>Use the heart on any piece to keep it close while you decide.</p>
+        <a class="cl-button cl-button--dark" routerLink="/products">Explore the collection</a>
+      </section>
+    } @else {
+      <div class="cl-product-grid">
+        @for (product of wishlist.products(); track product.id) {
+          <lib-product-card [product]="product" />
+        }
+      </div>
+    }
+  </div>
+</main>

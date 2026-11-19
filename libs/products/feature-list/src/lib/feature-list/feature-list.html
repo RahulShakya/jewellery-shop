@@ -1,0 +1,158 @@
+<main class="cl-page cl-catalogue-page">
+  <div class="cl-container">
+    <nav class="cl-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a><span aria-hidden="true">/</span><span>Collection</span>
+    </nav>
+    <header class="cl-page-heading cl-page-heading--catalogue">
+      <div>
+        <p class="cl-eyebrow">The collection</p>
+        <h1>Jewellery, made personal</h1>
+      </div>
+      <p>Discover enduring forms, thoughtfully made in precious metals and hand-selected stones.</p>
+    </header>
+
+    <form class="cl-catalogue-toolbar" (ngSubmit)="applyFilters()">
+      <label class="cl-search-field"
+        ><span class="cl-sr-only">Search jewellery</span><span aria-hidden="true">⌕</span
+        ><input
+          type="search"
+          placeholder="Search by name or style"
+          [value]="search()"
+          (input)="updateSearch($event)"
+        /><button type="submit">Search</button></label
+      >
+      <label
+        ><span class="cl-sr-only">Category</span
+        ><select [value]="category()" (change)="updateCategory($event)">
+          <option value="">All categories</option>
+          @for (item of categories(); track item.id) {
+            <option [value]="item.slug">{{ item.name }}</option>
+          }
+        </select></label
+      >
+      <label
+        ><span class="cl-sr-only">Sort products</span
+        ><select [value]="sort()" (change)="updateSort($event)">
+          <option value="featured">Featured</option>
+          <option value="newest">Newest first</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+          <option value="name-asc">Name: A to Z</option>
+          <option value="name-desc">Name: Z to A</option>
+        </select></label
+      >
+    </form>
+
+    <div class="cl-catalogue-layout">
+      <aside class="cl-filters" aria-label="Product filters">
+        <div>
+          <p class="cl-filter-title">Metal type</p>
+          <label class="cl-filter-field"
+            ><span>Metal</span
+            ><select [value]="metal()" (change)="updateMetal($event)">
+              <option value="">All metals</option>
+              @for (option of metals(); track option) {
+                <option [value]="option">{{ option }}</option>
+              }
+            </select></label
+          >
+        </div>
+        <div>
+          <p class="cl-filter-title">Price range</p>
+          <div class="cl-price-fields">
+            <label
+              ><span>Minimum</span
+              ><input
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="₹ 0"
+                [value]="minPrice()"
+                (input)="updateMinPrice($event)" /></label
+            ><label
+              ><span>Maximum</span
+              ><input
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="₹ Any"
+                [value]="maxPrice()"
+                (input)="updateMaxPrice($event)"
+            /></label>
+          </div>
+          <button class="cl-text-button" type="button" (click)="applyFilters()">Apply price</button>
+        </div>
+        <div class="cl-service-note">
+          <span aria-hidden="true">✦</span>
+          <p>
+            <strong>Need guidance?</strong>Our jewellery concierge can help you choose the perfect
+            piece.
+          </p>
+        </div>
+      </aside>
+
+      <section class="cl-catalogue-results" aria-live="polite" [attr.aria-busy]="loading()">
+        <div class="cl-results-count">
+          <p>{{ loading() ? 'Curating your selection…' : total() + ' pieces' }}</p>
+          <button class="cl-text-button" type="button" (click)="resetFilters()">
+            Clear filters
+          </button>
+        </div>
+        @if (loading()) {
+          <div class="cl-product-grid" aria-label="Loading products">
+            @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+              <div class="cl-product-skeleton"><span></span><span></span><span></span></div>
+            }
+          </div>
+        } @else if (error()) {
+          <div class="cl-empty-state">
+            <h2>We lost the sparkle</h2>
+            <p>{{ error() }}</p>
+            <button class="cl-button cl-button--dark" type="button" (click)="loadProducts()">
+              Try again
+            </button>
+          </div>
+        } @else if (products().length === 0) {
+          <div class="cl-empty-state">
+            <span class="cl-empty-state__icon" aria-hidden="true">◇</span>
+            <h2>No pieces match those filters</h2>
+            <p>Try broadening your search, or explore the complete collection.</p>
+            <button class="cl-button cl-button--dark" type="button" (click)="resetFilters()">
+              View all jewellery
+            </button>
+          </div>
+        } @else {
+          <div class="cl-product-grid">
+            @for (product of products(); track product.id) {
+              <lib-product-card [product]="product" />
+            }
+          </div>
+          @if (lastPage() > 1) {
+            <nav class="cl-pagination" aria-label="Product pages">
+              <button type="button" [disabled]="page() === 1" (click)="goToPage(page() - 1)">
+                Previous
+              </button>
+              @for (item of pages(); track item) {
+                <button
+                  type="button"
+                  [class.is-current]="item === page()"
+                  [attr.aria-current]="item === page() ? 'page' : null"
+                  (click)="goToPage(item)"
+                >
+                  {{ item }}
+                </button>
+              }
+              <button
+                type="button"
+                [disabled]="page() === lastPage()"
+                (click)="goToPage(page() + 1)"
+              >
+                Next
+              </button>
+            </nav>
+          }
+        }
+      </section>
+    </div>
+  </div>
+</main>

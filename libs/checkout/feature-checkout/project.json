@@ -1,0 +1,10 @@
+{
+  "name": "feature-checkout",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/checkout/feature-checkout/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["scope:shop", "type:feature"],
+  "// targets": "to see all targets run: nx show project feature-checkout --web",
+  "targets": {}
+}

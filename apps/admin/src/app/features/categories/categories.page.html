@@ -1,0 +1,165 @@
+<section class="admin-page" aria-labelledby="categories-heading">
+  <div class="page-intro">
+    <div>
+      <h2 id="categories-heading">Categories</h2>
+      <p>Shape how customers discover and browse your collection.</p>
+    </div>
+    <div class="page-actions">
+      <a class="button" routerLink="/categories/new">
+        <span aria-hidden="true">+</span> Add category
+      </a>
+    </div>
+  </div>
+
+  @if (errorMessage() && categories().length) {
+    <div class="dialog-error" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <section class="data-panel" aria-label="Product categories">
+    <div class="table-toolbar">
+      <label class="search-field">
+        <span class="sr-only">Search categories</span>
+        <input
+          type="search"
+          placeholder="Search categories"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+        />
+      </label>
+      <span class="table-secondary">{{ filteredCategories().length }} categories</span>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-lines" aria-label="Loading categories">
+        <span></span><span></span><span></span>
+      </div>
+    } @else if (errorMessage() && !categories().length) {
+      <div class="state-card" role="alert">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h3>Categories could not be loaded</h3>
+          <p>{{ errorMessage() }}</p>
+          <button class="button secondary" type="button" (click)="loadCategories()">
+            Try again
+          </button>
+        </div>
+      </div>
+    } @else if (!filteredCategories().length) {
+      <div class="state-card">
+        <div class="state-content">
+          <span class="state-icon" aria-hidden="true">◇</span>
+          <h3>{{ searchTerm() ? 'No matching categories' : 'Create your first category' }}</h3>
+          <p>
+            {{
+              searchTerm()
+                ? 'Try a different search term.'
+                : 'Organise products into collections customers can easily explore.'
+            }}
+          </p>
+          @if (!searchTerm()) {
+            <a class="button" routerLink="/categories/new">Add category</a>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col">Slug</th>
+              <th scope="col">Products</th>
+              <th scope="col">Status</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (category of filteredCategories(); track category.id) {
+              <tr>
+                <td>
+                  <div class="product-cell">
+                    <span class="product-thumb">
+                      @if (category.image_url || category.image) {
+                        <img [src]="category.image_url || category.image" alt="" />
+                      } @else {
+                        <span aria-hidden="true">◇</span>
+                      }
+                    </span>
+                    <span
+                      ><span class="table-primary">{{ category.name }}</span
+                      ><span class="table-secondary">{{
+                        category.description || 'No description'
+                      }}</span></span
+                    >
+                  </div>
+                </td>
+                <td>/{{ category.slug }}</td>
+                <td>{{ category.products_count || 0 | number }}</td>
+                <td>
+                  <span
+                    [class]="
+                      'status-badge ' + (category.is_active === false ? 'inactive' : 'active')
+                    "
+                    >{{ category.is_active === false ? 'Inactive' : 'Active' }}</span
+                  >
+                </td>
+                <td>
+                  <div class="table-actions">
+                    <a
+                      class="icon-action"
+                      aria-label="Edit {{ category.name }}"
+                      [routerLink]="['/categories', category.id, 'edit']"
+                    >
+                      ✎
+                    </a>
+                    <button
+                      class="icon-action danger"
+                      type="button"
+                      aria-label="Delete {{ category.name }}"
+                      (click)="categoryToDelete.set(category)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>
+
+@if (categoryToDelete(); as category) {
+  <div class="form-overlay">
+    <section
+      class="form-dialog confirm-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-category-heading"
+    >
+      <span class="state-icon" aria-hidden="true">!</span>
+      <h3 id="delete-category-heading">Delete {{ category.name }}?</h3>
+      <p>Products in this category may become uncategorised. This action cannot be undone.</p>
+      <div class="page-actions">
+        <button
+          class="button secondary"
+          type="button"
+          [disabled]="deleting()"
+          (click)="categoryToDelete.set(null)"
+        >
+          Cancel
+        </button>
+        <button
+          class="button danger"
+          type="button"
+          [disabled]="deleting()"
+          (click)="deleteCategory()"
+        >
+          {{ deleting() ? 'Deleting…' : 'Delete category' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

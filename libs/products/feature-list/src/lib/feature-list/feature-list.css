@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.cl-filter-field span {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--cl-muted);
+  font-size: 0.62rem;
+}
+
+.cl-filter-field select {
+  width: 100%;
+  height: 3rem;
+  border: 1px solid var(--cl-line);
+  border-radius: 0;
+  background: transparent;
+  padding: 0 0.9rem;
+  outline: none;
+  font-size: 0.75rem;
+}
+
+.cl-filter-field select:focus-visible {
+  border-color: var(--cl-ink);
+}

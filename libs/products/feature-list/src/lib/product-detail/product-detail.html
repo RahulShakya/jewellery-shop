@@ -1,0 +1,163 @@
+<main class="cl-page cl-product-detail-page">
+  <div class="cl-container">
+    <nav class="cl-breadcrumb" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a><span aria-hidden="true">/</span
+      ><a routerLink="/products">Collection</a>
+      @if (product(); as item) {
+        <span aria-hidden="true">/</span><span>{{ item.name }}</span>
+      }
+    </nav>
+    @if (loading()) {
+      <div class="cl-detail-skeleton">
+        <span></span>
+        <div><i></i><i></i><i></i></div>
+      </div>
+    } @else if (error()) {
+      <section class="cl-empty-state">
+        <h1>Piece not found</h1>
+        <p>{{ error() }}</p>
+        <a class="cl-button cl-button--dark" routerLink="/products">Back to the collection</a>
+      </section>
+    } @else if (product(); as item) {
+      <div class="cl-product-detail">
+        <div class="cl-product-detail__media">
+          <img [src]="productImage(item)" [alt]="item.name" /><span>Hand-finished</span>
+        </div>
+        <div class="cl-product-detail__info">
+          <p class="cl-eyebrow">{{ productCategoryName(item) }}</p>
+          <h1>{{ item.name }}</h1>
+          <div class="cl-detail-price">
+            <strong>{{ productPrice(item) | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+            @if (productOriginalPrice(item); as original) {
+              <s>{{ original | currency: 'INR' : 'symbol' : '1.0-2' }}</s>
+            }
+          </div>
+          @if (item.price_breakdown; as breakdown) {
+            <section class="cl-price-breakdown" aria-label="Price breakdown">
+              <div>
+                <span
+                  >Metal value
+                  @if (item.metal_price_per_gram) {
+                    <small
+                      >({{
+                        item.metal_price_per_gram | currency: 'INR' : 'symbol' : '1.0-2'
+                      }}/g)</small
+                    >
+                  }</span
+                ><strong>{{ breakdown.metal_value | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+              </div>
+              <div>
+                <span>Making charges</span
+                ><strong>{{
+                  breakdown.making_charges | currency: 'INR' : 'symbol' : '1.0-2'
+                }}</strong>
+              </div>
+              <div>
+                <span>Shipping charges</span>
+                @if (breakdown.shipping_charges > 0) {
+                  <strong>{{
+                    breakdown.shipping_charges | currency: 'INR' : 'symbol' : '1.0-2'
+                  }}</strong>
+                } @else {
+                  <strong>Included</strong>
+                }
+              </div>
+              <div class="cl-price-breakdown__subtotal">
+                <span>Subtotal</span
+                ><strong>{{ breakdown.subtotal | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+              </div>
+              @for (tax of breakdown.taxes; track tax.name + tax.rate) {
+                <div>
+                  <span>{{ tax.name }} ({{ tax.rate }}%)</span
+                  ><strong>{{ tax.amount | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+                </div>
+              }
+              <div class="cl-price-breakdown__total">
+                <span>Final price</span
+                ><strong>{{ breakdown.final_price | currency: 'INR' : 'symbol' : '1.0-2' }}</strong>
+              </div>
+            </section>
+          }
+          <p class="cl-detail-copy">
+            {{
+              item.description ||
+                item.short_description ||
+                'An enduring piece, thoughtfully crafted to become part of your story.'
+            }}
+          </p>
+          <dl class="cl-product-facts">
+            @if (item.material) {
+              <div>
+                <dt>Material</dt>
+                <dd>{{ item.material }}</dd>
+              </div>
+            }
+            @if (item.purity) {
+              <div>
+                <dt>Purity</dt>
+                <dd>{{ item.purity }}</dd>
+              </div>
+            }
+            @if (item.weight) {
+              <div>
+                <dt>Weight</dt>
+                <dd>{{ item.weight }} g</dd>
+              </div>
+            }
+            <div>
+              <dt>Availability</dt>
+              <dd>{{ item.stock > 0 ? 'Ready to dispatch' : 'Made to order' }}</dd>
+            </div>
+          </dl>
+          <div class="cl-detail-purchase">
+            <div class="cl-quantity" aria-label="Quantity">
+              <button type="button" aria-label="Decrease quantity" (click)="changeQuantity(-1)">
+                −</button
+              ><span>{{ quantity() }}</span
+              ><button type="button" aria-label="Increase quantity" (click)="changeQuantity(1)">
+                +
+              </button>
+            </div>
+            <button
+              class="cl-button cl-button--dark cl-button--grow"
+              type="button"
+              [disabled]="item.stock < 1"
+              (click)="addToBag()"
+            >
+              {{
+                added()
+                  ? 'Added to bag ✓'
+                  : item.stock < 1
+                    ? 'Enquire about this piece'
+                    : 'Add to bag'
+              }}
+            </button>
+            <button
+              class="cl-icon-button cl-detail-wish"
+              type="button"
+              [attr.aria-label]="wishlist.has(item.id) ? 'Remove from wishlist' : 'Add to wishlist'"
+              [attr.aria-pressed]="wishlist.has(item.id)"
+              (click)="wishlist.toggle(item)"
+            >
+              {{ wishlist.has(item.id) ? '♥' : '♡' }}
+            </button>
+          </div>
+          <div class="cl-detail-assurances">
+            <p>
+              <span aria-hidden="true">◇</span><strong>Certified quality</strong
+              ><small>BIS hallmarked precious metals</small>
+            </p>
+            <p>
+              <span aria-hidden="true">♢</span><strong>Insured delivery</strong
+              ><small>Shipping is included in the item price</small>
+            </p>
+            <p>
+              <span aria-hidden="true">↻</span><strong>7-day returns</strong
+              ><small>For complete peace of mind</small>
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</main>
